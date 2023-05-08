@@ -82,7 +82,7 @@ function Main() {
           );
         },
         tabBarActiveTintColor: theme.themeColor,
-        tabBarInactiveTintColor: 'gray',
+        tabBarInactiveTintColor: theme.color,
         tabBarItemStyle: {
           backgroundColor: theme.backgroundColor,
         },

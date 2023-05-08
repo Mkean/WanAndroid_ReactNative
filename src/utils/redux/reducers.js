@@ -4,7 +4,7 @@ import themes from '../config/themes';
 const UIContext = createContext();
 
 const store = {
-  theme: themes.night,
+  theme: themes.iris_blue,
 };
 
 const handle = (state, action) => {

@@ -1,29 +1,27 @@
-import {CommonConstant} from '../GlobalConstant';
-import HttpConfig, {XHttpConst} from './HttpConfig';
+import HttpConfig, {HttpConst, Constant} from './HttpConfig';
 import {getParams, parseData, XRequestLog} from './HttpUtils';
 import {emptyTip, isEmpty, isFullUrl, selfOr} from '../utils';
 
-const GET_METHOD = 'GET';
-
 export default class HttpRequest {
-  constructor(serverTag = XHttpConst.ServerTag) {
+  constructor(serverTag = HttpConst.ServerTag) {
     this.data = {
-      url: '', // Url
-      params: {}, // Specify parameters
+      url: '', // url
+      requestInit: {}, // specify parameters
       formData: null, // Specify parameter of FormData
       paramRaw: null, // Specify parameter
       header: {}, // Header parameters
       extra: {}, // User extension field
-      method: GET_METHOD, // Http Method
+      method: 'GET', // Http Method
       rawData: false, // Need to return the raw data
       internal: true, // Internal request (virtual tag)
       pureText: false, // Return the original Text or not
       loadingFunc: null, // Http load status callback
-      resendRequest: null, // Save the request method to retrieve the new Token and then request again
-      enableParamSetFunc: true, // common params setHeaderFunc
-      enableHeaderSetFunc: true, // common headers setParamFunc
-      serverTag: serverTag, // request protocol config Tag
+      resendRequest: null, // Save the request method to retrieve the new Token and the request again
+      enableParamSetFunc: true, // common params setParamFunc
+      enableHeaderSetFunc: true, // common params setHeaderFunc
+      serverTag: serverTag, // request protocol config tag
     };
+
     HttpConfig[serverTag] || new HttpConfig(serverTag); // make sure base config
   }
 
@@ -36,7 +34,7 @@ export default class HttpRequest {
     if (param instanceof FormData) {
       this.data.formData = selfOr(param, {});
     } else {
-      this.data.params = selfOr(param, {});
+      this.data.param = selfOr(param, {});
     }
     return this;
   }
@@ -52,7 +50,7 @@ export default class HttpRequest {
   }
 
   internal(internal = true) {
-    this.data.internal = internal;
+    this.data.internal = true;
     return this;
   }
 
@@ -83,17 +81,17 @@ export default class HttpRequest {
   }
 
   formJson() {
-    this.data.contentType = XHttpConst.CONTENT_TYPE_JSON;
+    this.data.contentType = HttpConst.CONTENT_TYPE_JSON;
     return this;
   }
 
   formData() {
-    this.data.contentType = XHttpConst.CONTENT_TYPE_FORM_DATA;
+    this.data.contentType = HttpConst.CONTENT_TYPE_FORM_DATA;
     return this;
   }
 
   formEncoded() {
-    this.data.contentType = XHttpConst.CONTENT_TYPE_URLENCODED;
+    this.data.contentType = HttpConst.CONTENT_TYPE_URLENCODED;
     return this;
   }
 
@@ -108,7 +106,7 @@ export default class HttpRequest {
   }
 
   get(callback) {
-    this.data.method = GET_METHOD;
+    this.data.method = 'GET';
     exec(this.data, callback);
   }
 
@@ -138,12 +136,12 @@ export default class HttpRequest {
   }
 
   request(method, callback) {
-    this.data.method = selfOr(method, GET_METHOD).toUpperCase();
+    this.data.method = selfOr(method, 'GET').toUpperCase();
     exec(this.data, callback);
   }
 
   execute(method) {
-    this.data.method = selfOr(method, GET_METHOD).toUpperCase();
+    this.data.method = selfOr(method, 'GET').toUpperCase();
     return new Promise((resolve, reject) => {
       exec(this.data, (success, json, message, status, response) => {
         resolve({success, json, message, status, response});
@@ -152,19 +150,23 @@ export default class HttpRequest {
   }
 
   fetch(method) {
-    this.data.method = selfOr(method, GET_METHOD).toUpperCase();
+    this.data.method = selfOr(method, 'GET').toUpperCase();
     let {baseUrl} = HttpConfig[this.data.serverTag];
-    if (emptyTip(this.data.url, 'Please set the request url')) {
+    if (emptyTip(this.data.url, 'Please set the request url!')) {
       return;
     }
     if (
       !isFullUrl(this.data.url) &&
-      emptyTip(baseUrl, 'Please set a full url or set up a baseUrl before this')
+      emptyTip(
+        baseUrl,
+        'Please set a full url or set up a baseUrl before this!',
+      )
     ) {
       return;
     }
-    let {url, params} = getParams(this.data);
-    return fetch(url, params);
+
+    let {url, requestInit} = getParams(this.data);
+    return fetch(url, requestInit);
   }
 }
 
@@ -176,42 +178,42 @@ function exec(data, callback) {
     networkExceptionFunc,
     timeout,
   } = HttpConfig[data.serverTag];
-  if (emptyTip(data.url, 'Please set the request url')) {
-    return;
-  }
+  if (emptyTip(data.url, 'Please set the request url!')) return;
   if (
     !isFullUrl(data.url) &&
-    emptyTip(baseUrl, 'Please set a full url or set up a baseUrl before this')
-  ) {
+    emptyTip(baseUrl, 'Please set a full url or set up a baseUrl before this!')
+  )
     return;
-  }
 
-  let {url, loadingFunc, params} = getParams(data);
-  data.paramRaw && (params.body = data.paramRaw);
-  data.resendRequest = exec; // Pass the current method to data for a re-request after the accessToken refresh
-  data.apiName = getApiName(url); // Gets the interface name of the Url
+  let {url, requestInit, loadingFunc} = getParams(data);
 
-  loadingFunc && loadingFunc(true);
+  data.paramRaw && (requestInit.body = data.paramRaw);
+  data.resendRequest = exec;
+  data.apiName = getApiName(url);
+
   globalLoadingFunc && globalLoadingFunc(true);
+  loadingFunc && loadingFunc(true);
+
   let success = false,
     json = null,
     error = null,
     status = -1;
 
-  if (!CommonConstant.networkAvailable) {
-    loadingFunc && loadingFunc(false);
+  if (!Constant.networkAvailable) {
     globalLoadingFunc && globalLoadingFunc(false);
-    networkExceptionFunc &&
-      networkExceptionFunc(XHttpConst.NETWORK_INVALID, -2);
-    callback(false, {}, XHttpConst.NETWORK_INVALID, -2, {});
+    loadingFunc && loadingFunc(false);
+
+    networkExceptionFunc && networkExceptionFunc(HttpConst.NETWORK_INVALID, -2);
+    callback(false, {}, HttpConst.NETWORK_INVALID, -2, {});
     return;
   }
 
-  Promise.race([fetch(url, params), timerFunc(data, timeout)])
+  Promise.race([fetch(url, requestInit), timerFunc(data, timeout)])
     .then(resp => {
       response = resp;
       status = resp.status;
       success = status >= 200 && status < 400;
+
       return data.pureText ? resp.text() : resp.json();
     })
     .then(origin => {
@@ -224,10 +226,10 @@ function exec(data, callback) {
     .finally(() => {
       data.timerId && clearTimeout(data.timerId);
       if (HttpConfig[data.serverTag].logOn) {
-        XRequestLog(url, data.apiName, params, response); //打印Http请求日志
+        XRequestLog(url, data.apiName, requestInit, response);
       }
-      loadingFunc && loadingFunc(false);
       globalLoadingFunc && globalLoadingFunc(false);
+      loadingFunc && loadingFunc(false);
       if (isEmpty(callback)) {
         return;
       }
@@ -237,13 +239,12 @@ function exec(data, callback) {
     });
 }
 
-function timerFunc(data, time) {
-  // setTimeout
+function timerFunc(data, timeout) {
   return new Promise(function (resolve, reject) {
     data.timerId = setTimeout(() => {
       data.timerId = null;
       reject(new Error('Network connection timeout'));
-    }, selfOr(data.timeout, time));
+    }, selfOr(data.timeout, timeout));
   });
 }
 

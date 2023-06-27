@@ -12,6 +12,7 @@ XHttpConfig()
   .initLogOn(true)
   .initBaseUrl('https://www.wanandroid.com/')
   .initContentType(HttpConst.CONTENT_TYPE_FORM_DATA)
+  .initCredentials(HttpConst.Credentials.include)
   .initLoadingFunc(isLoading => {
     console.log('isLoading: ' + isLoading);
   });

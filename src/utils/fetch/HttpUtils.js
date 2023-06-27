@@ -15,6 +15,7 @@ export function getParams(data) {
     headerSetFunc,
     paramSetFunc,
     baseUrl,
+    credentials,
     commonParam = {},
     encodeComponent,
     contentType: configContentType,
@@ -50,7 +51,7 @@ export function getParams(data) {
   };
 
   result.requestInit.dateTime = new Date().valueOf();
-  result.requestInit.credential = 'include';
+  result.requestInit.credential = credentials;
 
   const finalContentType = result.requestInit.headers['Content-Type'];
   const needEncoded = finalContentType.includes(
@@ -90,7 +91,6 @@ export function getParams(data) {
     delete result.requestInit.body;
   }
   result.url = newUrl;
-  console.log(`result: ${JSON.stringify(result)}}`);
   return result;
 }
 

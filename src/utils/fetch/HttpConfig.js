@@ -12,6 +12,11 @@ export const HttpConst = {
   CONTENT_TYPE_URLENCODED: 'application/x-www-form-urlencoded',
   NETWORK_INVALID: 'Network is not available',
   Methods: new Set(['GET', 'DELETE', 'OPTIONS']), // request mode without body
+  Credentials: {
+    same_origin: 'same-origin', // 不发送跨域 cookie，default
+    include: 'include', //  持久 cookie，跨域
+    omit: 'omit', // 不包含 cookie
+  },
   ServerTag: 'TAG', // server protocol tag
   statusDesc: {
     403: 'The server is not allowed to reject the request #403',
@@ -25,6 +30,7 @@ export default class HttpConfig {
   constructor(serverTag = HttpConst.ServerTag) {
     this.timeout = HttpConst.TIMEOUT;
     this.contentType = HttpConst.CONTENT_TYPE_JSON;
+    this.credentials = HttpConst.Credentials.same_origin;
     this.encodeComponent = false;
     HttpConfig[serverTag] = this;
   }
@@ -41,6 +47,11 @@ export default class HttpConfig {
 
   initLogOn(logOn) {
     this.logOn = logOn;
+    return this;
+  }
+
+  initCredentials(credentials) {
+    this.credentials = credentials;
     return this;
   }
 

@@ -17,32 +17,32 @@ const Tab = createBottomTabNavigator();
 const BottomMap = {
   Home: {
     title: i18n.t('Home'),
-    normalIconSource: require('../../images/icon_home.png'),
-    selectedIconSource: require('../../images/icon_home_selected.png'),
+    normalIconSource: require('../../images/bottom_navigator/icon_home.png'),
+    selectedIconSource: require('../../images/bottom_navigator/icon_home_selected.png'),
     component: Home,
   },
   Project: {
     title: i18n.t('Project'),
-    normalIconSource: require('../../images/icon_project.png'),
-    selectedIconSource: require('../../images/icon_project_selected.png'),
+    normalIconSource: require('../../images/bottom_navigator/icon_project.png'),
+    selectedIconSource: require('../../images/bottom_navigator/icon_project_selected.png'),
     component: Project,
   },
   Navigator: {
     title: i18n.t('Navigator'),
-    normalIconSource: require('../../images/icon_navigator.png'),
-    selectedIconSource: require('../../images/icon_navigator_selected.png'),
+    normalIconSource: require('../../images/bottom_navigator/icon_navigator.png'),
+    selectedIconSource: require('../../images/bottom_navigator/icon_navigator_selected.png'),
     component: Navigator,
   },
   Group: {
     title: i18n.t('Group'),
-    normalIconSource: require('../../images/icon_group.png'),
-    selectedIconSource: require('../../images/icon_group_selected.png'),
+    normalIconSource: require('../../images/bottom_navigator/icon_group.png'),
+    selectedIconSource: require('../../images/bottom_navigator/icon_group_selected.png'),
     component: Group,
   },
   Profile: {
     title: i18n.t('Profile'),
-    normalIconSource: require('../../images/icon_profile.png'),
-    selectedIconSource: require('../../images/icon_profile_selected.png'),
+    normalIconSource: require('../../images/bottom_navigator/icon_profile.png'),
+    selectedIconSource: require('../../images/bottom_navigator/icon_profile_selected.png'),
     component: Profile,
   },
 };

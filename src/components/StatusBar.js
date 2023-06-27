@@ -1,6 +1,8 @@
 import React from 'react';
 import {StatusBar, Platform} from 'react-native';
 
+export const statusBarHeight = StatusBar.currentHeight;
+
 export const withStatusBar =
   (statusbarProps = {}) =>
   WrappedComponent => {

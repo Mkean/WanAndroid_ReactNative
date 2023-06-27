@@ -6,7 +6,7 @@ export const Constant = {
 };
 
 export const HttpConst = {
-  TIMEOUT: 15_000, // default timeout
+  TIMEOUT: 30_000, // default timeout
   CONTENT_TYPE_JSON: 'application/json',
   CONTENT_TYPE_FORM_DATA: 'multipart/form-data',
   CONTENT_TYPE_URLENCODED: 'application/x-www-form-urlencoded',

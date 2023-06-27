@@ -10,7 +10,7 @@ const store = {
 const handle = (state, action) => {
   switch (action.type) {
     case 'theme':
-      return {...state, theme: action.value};
+      return {...state, theme: action.theme};
 
     default:
       return state;
@@ -20,10 +20,10 @@ const handle = (state, action) => {
 const combineReducers = reducers => {
   return function (state, action) {
     return Object.keys(reducers)
-      .map(k => ({
-        [k]: reducers[k](state[k], action),
-      }))
-      .reduce((prev, cur) => Object.assign({}, prev, cur));
+      .map(k => ({...reducers[k](state[k], action)}))
+      .reduce((prev, cur) => {
+        return Object.assign({}, prev, cur);
+      });
   };
 };
 

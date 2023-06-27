@@ -143,8 +143,12 @@ export default class HttpRequest {
   execute(method) {
     this.data.method = selfOr(method, 'GET').toUpperCase();
     return new Promise((resolve, reject) => {
-      exec(this.data, (success, json, message, status, response) => {
-        resolve({success, json, message, status, response});
+      exec(this.data, ({isSuccess, data, message, code, response}) => {
+        if (isSuccess) {
+          resolve({isSuccess, data, message, code, response});
+        } else {
+          reject(message);
+        }
       });
     });
   }
@@ -178,12 +182,15 @@ function exec(data, callback) {
     networkExceptionFunc,
     timeout,
   } = HttpConfig[data.serverTag];
-  if (emptyTip(data.url, 'Please set the request url!')) return;
+  if (emptyTip(data.url, 'Please set the request url!')) {
+    return;
+  }
   if (
     !isFullUrl(data.url) &&
     emptyTip(baseUrl, 'Please set a full url or set up a baseUrl before this!')
-  )
+  ) {
     return;
+  }
 
   let {url, requestInit, loadingFunc} = getParams(data);
 
@@ -213,7 +220,6 @@ function exec(data, callback) {
       response = resp;
       status = resp.status;
       success = status >= 200 && status < 400;
-
       return data.pureText ? resp.text() : resp.json();
     })
     .then(origin => {

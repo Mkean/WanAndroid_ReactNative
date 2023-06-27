@@ -1,10 +1,10 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Image} from 'react-native';
-import {withStatusBar} from '../components/StatusBar';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {withStatusBar} from '../components/StatusBar';
 import i18n from '../../localize/i18n';
-import {CustomStyleSheet} from './../utils/ScreenUtils';
-import {useReducersContext} from './../utils/redux';
+import {CustomStyleSheet} from '../utils/ScreenUtils';
+import {useReducersContext} from '../utils/redux';
 
 import {Home} from './home';
 import {Project} from './project';
@@ -51,7 +51,14 @@ function getScreen() {
   let keys = Object.keys(BottomMap);
   return Object.values(BottomMap).map((value, index) => {
     return (
-      <Tab.Screen component={value.component} name={keys[index]} key={index} />
+      <Tab.Screen
+        component={value.component}
+        name={keys[index]}
+        key={index}
+        options={{
+          headerShown: false,
+        }}
+      />
     );
   });
 }
@@ -73,6 +80,7 @@ function Main() {
       initialRouteName="Home"
       screenOptions={({route}) => ({
         title: BottomMap[route.name].title,
+        lazy: true,
         tabBarIcon: ({focused, color, size}) => {
           return (
             <Image
@@ -94,9 +102,12 @@ function Main() {
 
 const styles = CustomStyleSheet.create({
   bottomIcon: {
-    width: 40,
-    height: 40,
+    width: 24,
+    height: 24,
   },
 });
 
-export default withStatusBar()(Main);
+export default withStatusBar({
+  backgroundColor: 'transparent',
+  translucent: true,
+})(Main);

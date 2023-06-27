@@ -9,9 +9,9 @@ import {name as appName} from './app.json';
 import {XHttpConfig, HttpConst} from './src/utils/fetch';
 
 XHttpConfig()
-  .initLogOn(false)
+  .initLogOn(true)
   .initBaseUrl('https://www.wanandroid.com/')
-  .initContentType(HttpConst.CONTENT_TYPE_JSON)
+  .initContentType(HttpConst.CONTENT_TYPE_FORM_DATA)
   .initLoadingFunc(isLoading => {
     console.log('isLoading: ' + isLoading);
   });

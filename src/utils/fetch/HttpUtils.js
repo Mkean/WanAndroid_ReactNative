@@ -38,20 +38,29 @@ export function getParams(data) {
     'Content-Type': selfOr(contentType, configContentType),
   };
 
-  enableHeaderSetFunc &&
+  let globalHeaders =
+    enableHeaderSetFunc &&
     headerSetFunc &&
     headerSetFunc(result.requestInit.headers, data);
-  result.requestInit.headers = {...result.requestInit.headers, ...header};
+
+  result.requestInit.headers = {
+    ...result.requestInit.headers,
+    ...header,
+    ...globalHeaders,
+  };
+
   result.requestInit.dateTime = new Date().valueOf();
+  result.requestInit.credential = 'include';
 
   const finalContentType = result.requestInit.headers['Content-Type'];
   const needEncoded = finalContentType.includes(
     HttpConst.CONTENT_TYPE_URLENCODED,
   );
-  enableParamSetFunc && paramSetFunc && paramSetFunc(commonParam, data);
+  let globalCommonParam =
+    enableParamSetFunc && paramSetFunc && paramSetFunc(commonParam, data);
 
   let finalParam = encodeParams(
-    commonParam,
+    globalCommonParam,
     param,
     encodeComponent,
     needEncoded,
@@ -81,6 +90,7 @@ export function getParams(data) {
     delete result.requestInit.body;
   }
   result.url = newUrl;
+  console.log(`result: ${JSON.stringify(result)}}`);
   return result;
 }
 
@@ -93,14 +103,18 @@ function encodeParams(commonParam, param, encodeComponent, needEncoded) {
       encodeURLComponent(param);
     }
   } else {
-    if (Array.isArray(param)) return param;
+    if (Array.isArray(param)) {
+      return param;
+    }
     param = {...commonParam, ...param};
   }
   return param;
 }
 
 function encodeURLComponent(param) {
-  if (Array.isArray(param)) return;
+  if (Array.isArray(param)) {
+    return;
+  }
   for (let keyStr in param) {
     if (param.hasOwnProperty(keyStr)) {
       let value = param[keyStr];
@@ -115,7 +129,7 @@ export function parseData(data, result, callback) {
   let {parseDataFunc} = HttpConfig[data.serverTag],
     message = '';
   let {success, response, json, status, error} = result;
-  message = getErrorMsg(error, status) + ' => ' + data.url;
+  message = getErrorMsg(error, status, json) + ' => ' + data.url;
   let finalResult = {
     isSuccess: success,
     data: json,
@@ -136,16 +150,18 @@ export function parseData(data, result, callback) {
   }
 }
 
-export function getErrorMsg(error, status) {
+export function getErrorMsg(error, status, json) {
   let {statusDesc} = HttpConst,
     message = '';
   if (error) {
     message = selfOr(error.message, selfOr(statusDesc[status]));
     message = selfOr(message, error.message + ' code: ' + status);
+  } else if (objHasKey(json)) {
+    message = selfOr(json, {});
   } else {
     message = ' code: ' + status;
   }
-  return message;
+  return JSON.stringify(message);
 }
 
 export function XPackage(origin, target) {
@@ -162,7 +178,7 @@ export function XPackage(origin, target) {
 
 export function XRequestLog(url, apiName, params, response, tempResult) {
   if (response && isEmpty(response._bodyText) && isEmpty(tempResult)) {
-    let reader = new FileReader();
+    let reader = new window.FileReader();
     reader.addEventListener('loadend', () => {
       if (isEmpty(reader.result)) {
         console.log('Request read failed ==>');
@@ -198,8 +214,7 @@ export function XRequestLog(url, apiName, params, response, tempResult) {
           dateFormat(new Date(startTime), 'yyyy-MM-dd hh:mm:ss'),
       );
       console.log(
-        '=====Cost Time=====>' + (new Date().valueOf() - startTime),
-        'ms',
+        '=====Cost Time=====>' + (new Date().valueOf() - startTime) + 'ms',
       );
     } else {
       if (response) {
@@ -209,8 +224,7 @@ export function XRequestLog(url, apiName, params, response, tempResult) {
             dateFormat(new Date(startTime), 'yyyy-MM-dd hh:mm:ss'),
         );
         console.log(
-          '=====Cost Time=====>' + (new Date().valueOf() - startTime),
-          'ms',
+          '=====Cost Time=====>' + (new Date().valueOf() - startTime) + 'ms',
         );
       }
     }

@@ -5,9 +5,9 @@ import {withStatusBar, statusBarHeight} from '../../components/StatusBar';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {CustomStyleSheet, scaleSize} from '../../utils/ScreenUtils';
 import {useReducersContext} from '../../utils/redux';
-import {login as loginApi} from '../../utils/api/login/LoginApi';
+import {register as registerApi} from '../../utils/api/login/LoginApi';
 
-const Login = ({navigation}) => {
+const Register = ({navigation}) => {
   const {
     state: {theme},
   } = useReducersContext();
@@ -16,7 +16,9 @@ const Login = ({navigation}) => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [repassword, setRepassword] = useState('');
   const [secure, setSecure] = useState(true);
+  const [reSecure, setReSecure] = useState(true);
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -67,27 +69,35 @@ const Login = ({navigation}) => {
     setSecure(!secure);
   }
 
-  async function login() {
+  function toggleRePasswordVisibility() {
+    setReSecure(!reSecure);
+  }
+
+  async function register() {
     try {
       if (!password || password.length < 6) {
         console.log('请输入6位以上的密码');
         return;
       }
+      if (!repassword || repassword.length < 6) {
+        console.log('请输入6位以上的确认密码');
+        return;
+      }
+      if (password !== repassword) {
+        console.log('确认密码与密码不符');
+        return;
+      }
       const {
         data: {errorCode, errorMsg},
-      } = await loginApi(username, password);
+      } = await registerApi(username, password);
       if (errorCode === 0) {
         onBack();
         return;
       }
-      console.log(`登录失败: ${JSON.stringify(errorMsg)}`);
+      console.log(`注册失败: ${JSON.stringify(errorMsg)}`);
     } catch (e) {
-      console.log('登录失败: ' + JSON.stringify(e));
+      console.log('注册失败: ' + JSON.stringify(e));
     }
-  }
-
-  function register() {
-    navigation.navigate('Register');
   }
 
   return (
@@ -96,11 +106,6 @@ const Login = ({navigation}) => {
         <Icon name="left" size={scaleSize(30)} color={theme.themeColor} />
       </Pressable>
       <Animated.View style={[styles.content, contentStyle]}>
-        <Image
-          style={styles.icon}
-          source={require('../../../images/ic_launcher_round.png')}
-        />
-
         <TextInput
           style={styles.input}
           label="用户名"
@@ -127,19 +132,32 @@ const Login = ({navigation}) => {
           }
           secureTextEntry={secure}
         />
+
+        <TextInput
+          style={styles.input}
+          label="确认密码"
+          value={repassword}
+          mode={'outlined'}
+          activeOutlineColor={theme.themeColor}
+          outlineColor={theme.color}
+          onChangeText={setRepassword}
+          right={
+            <TextInput.Icon
+              icon={reSecure ? 'eye-off' : 'eye'}
+              onPress={toggleRePasswordVisibility}
+            />
+          }
+          secureTextEntry={reSecure}
+        />
         <Button
-          style={styles.login}
+          style={styles.register}
           mode={'contained'}
           buttonColor={theme.backgroundColor}
           textColor={'#fff'}
-          disabled={password === '' || username === ''}
-          onPress={login}>
-          登录
+          disabled={username === '' || password === '' || repassword === ''}
+          onPress={register}>
+          注册
         </Button>
-
-        <Pressable onPress={register}>
-          <Text style={styles.register(theme)}>没有账号?来注册吧</Text>
-        </Pressable>
       </Animated.View>
     </View>
   );
@@ -156,13 +174,7 @@ const styles = CustomStyleSheet.create({
   content: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-
-  icon: {
-    width: 144,
-    height: 144,
-    alignSelf: 'center',
-    marginTop: '25%',
+    paddingTop: '35%',
   },
 
   input: {
@@ -170,19 +182,15 @@ const styles = CustomStyleSheet.create({
     marginTop: 16,
   },
 
-  login: {
+  register: {
     width: 144,
-    marginTop: 24,
-  },
-
-  register: theme => ({
+    height: 38,
+    justifyContent: 'center',
     marginTop: 16,
-    fontSize: 15,
-    color: theme.themeColor,
-  }),
+  },
 });
 
 export default withStatusBar({
   backgroundColor: 'transparent',
   translucent: true,
-})(Login);
+})(Register);

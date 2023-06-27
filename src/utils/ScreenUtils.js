@@ -37,7 +37,7 @@ export function scaleSize(size) {
   const scaleHeight = screenH / h2;
   const scale = Math.min(scaleWidth, scaleHeight);
   size = Math.round(size * scale + 0.5);
-  return size / DEFAULT_DENSITY;
+  return size;
 }
 
 type StyleProps = Partial<ViewStyle | TextStyle | ImageStyle>;
